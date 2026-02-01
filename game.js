@@ -62,6 +62,11 @@ let finishTimeMs = 0;
 let nameInputActive = false;
 let nameInput = "";
 
+// Only show name input if user hasn’t submitted today
+if(streakData.lastWinDate !== today){
+    nameInputActive = false; // will activate when user wins
+}
+
 // ========== INIT PLAYER ==========
 player.x = platforms[0].x + platforms[0].w/2 - player.w/2;
 player.y = platforms[0].y - player.h;
@@ -88,6 +93,7 @@ function submitName(){
     if(nameInput.trim()==="") nameInput="Guest";
     streakData.playerName=nameInput.substring(0,12);
     streakData.lastTimeMs=finishTimeMs;
+    streakData.lastWinDate=today;
     localStorage.setItem("flipventure_streak", JSON.stringify(streakData));
 
     // update leaderboard
@@ -109,11 +115,11 @@ function updateLeaderboardHTML(){
     lbList.innerHTML="";
     for(let i=0;i<5;i++){
         let entry=todayLB[i];
-        let text="—:—:—";
+        let text="";
         if(entry){
             let totalSec=Math.floor(entry.time/1000);
-            let ms=entry.time%1000;
-            text=`${entry.name}:${totalSec}:${ms.toString().padStart(3,"0")}`;
+            let ms=Math.floor((entry.time%1000)/100); // 1 decimal place
+            text=`${entry.name}:${totalSec}:${ms}`;
         }
         const li=document.createElement("li");
         li.textContent=text;
@@ -151,7 +157,10 @@ function update(){
 
         if(player.x+player.w>goal.x && player.x<goal.x+goal.w && player.y+player.h>goal.y && player.y<goal.y+goal.h){
             gameState="won"; finishTimeMs=Date.now()-startTime;
-            if(!nameInputActive){ nameInputActive=true; nameInput=streakData.playerName || ""; }
+            if(!nameInputActive && streakData.lastWinDate!==today){ 
+                nameInputActive=true; 
+                nameInput=""; 
+            }
         }
 
         if(player.x<0) player.x=0;
@@ -188,15 +197,13 @@ function draw(){
         ctx.fillStyle="rgba(0,0,0,0.7)"; ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.fillStyle="#3cb371"; ctx.font="50px Arial"; ctx.textAlign="center";
         ctx.fillText("LEVEL COMPLETE!",canvas.width/2,canvas.height/2);
-        ctx.font="22px Arial"; ctx.fillText("Enter name below",canvas.width/2,canvas.height/2+50);
-    }
-
-    // Name input
-    if(nameInputActive){
-        ctx.fillStyle="#ffffff"; ctx.fillRect(canvas.width/2-100,canvas.height/2+90,200,35);
-        ctx.fillStyle="#000000"; ctx.font="20px Arial"; ctx.textAlign="left";
-        ctx.fillText(nameInput,canvas.width/2-95,canvas.height/2+117);
-        ctx.textAlign="center";
+        if(nameInputActive){
+            ctx.font="22px Arial"; ctx.fillText("Enter name below",canvas.width/2,canvas.height/2+50);
+            ctx.fillStyle="#ffffff"; ctx.fillRect(canvas.width/2-100,canvas.height/2+90,200,35);
+            ctx.fillStyle="#000000"; ctx.font="20px Arial"; ctx.textAlign="left";
+            ctx.fillText(nameInput,canvas.width/2-95,canvas.height/2+117);
+            ctx.textAlign="center";
+        }
     }
 }
 
