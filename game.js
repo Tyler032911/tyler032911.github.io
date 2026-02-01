@@ -9,7 +9,7 @@ let gravity = 0.5;
 let gravityDir = 1;
 let speedX = 4;
 
-// ================= DAILY STREAK (EST) =================
+// ================= DAILY STREAK + NAME =================
 function getESTDateString() {
     const now = new Date();
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -25,7 +25,8 @@ function getYesterdayEST(dateStr) {
 
 let streakData = JSON.parse(localStorage.getItem("flipventure_streak")) || {
     lastWinDate: null,
-    streak: 0
+    streak: 0,
+    playerName: null
 };
 
 let streakUpdatedThisRun = false;
@@ -150,6 +151,7 @@ function update() {
             if (!streakUpdatedThisRun) {
                 const today = getESTDateString();
 
+                // Update streak
                 if (streakData.lastWinDate === getYesterdayEST(today)) {
                     streakData.streak += 1;
                 } else {
@@ -157,6 +159,16 @@ function update() {
                 }
 
                 streakData.lastWinDate = today;
+
+                // Prompt for name once
+                if (!streakData.playerName) {
+                    let name = prompt(
+                        "Congrats! Enter your name for the leaderboard:"
+                    );
+                    if (!name) name = "Guest";
+                    streakData.playerName = name.substring(0, 12);
+                }
+
                 localStorage.setItem(
                     "flipventure_streak",
                     JSON.stringify(streakData)
@@ -178,7 +190,8 @@ function update() {
 
 // ================= DRAW =================
 function draw() {
-    ctx.fillStyle = "#eee";
+    // Canvas background
+    ctx.fillStyle = "#dbe9f4"; // light blue, can change
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Platforms
@@ -224,6 +237,7 @@ function draw() {
         ctx.textAlign = "center";
         ctx.fillText("LEVEL COMPLETE!", canvas.width / 2, canvas.height / 2);
 
+        // Streak
         ctx.font = "24px Arial";
         ctx.fillStyle = "#ffffff";
         ctx.fillText(
@@ -234,15 +248,23 @@ function draw() {
             canvas.height / 2 + 60
         );
 
+        // Player Name
+        ctx.font = "22px Arial";
+        ctx.fillText(
+            `Player: ${streakData.playerName || "Guest"}`,
+            canvas.width / 2,
+            canvas.height / 2 + 90
+        );
+
+        // Reminder
         ctx.font = "18px Arial";
         ctx.fillText(
             "Come back tomorrow",
             canvas.width / 2,
-            canvas.height / 2 + 95
+            canvas.height / 2 + 120
         );
     }
 }
 
 // ================= START =================
 update();
-
