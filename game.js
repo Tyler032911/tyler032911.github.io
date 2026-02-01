@@ -75,18 +75,42 @@ let goal = {
 let keys = {};
 let gameState = "playing";
 
+// ================= TIMER =================
+let startTime = Date.now();
+let finishTime = 0;
+
+// ================= NAME INPUT =================
+let nameInputActive = false;
+let nameInput = "";
+
 // ================= INIT PLAYER =================
 player.x = platforms[0].x + platforms[0].w / 2 - player.w / 2;
 player.y = platforms[0].y - player.h;
 
 // ================= CONTROLS =================
 document.addEventListener("keydown", e => {
-    keys[e.code] = true;
-    if (e.code === "Space" && gameState === "playing") {
-        gravityDir *= -1;
+    if (gameState === "playing") {
+        keys[e.code] = true;
+        if (e.code === "Space") gravityDir *= -1;
+    }
+    // Handle name input
+    if (nameInputActive) {
+        if (e.key === "Backspace") {
+            nameInput = nameInput.slice(0, -1);
+        } else if (e.key === "Enter") {
+            if (nameInput.trim() === "") nameInput = "Guest";
+            streakData.playerName = nameInput.substring(0, 12);
+            localStorage.setItem("flipventure_streak", JSON.stringify(streakData));
+            nameInputActive = false;
+        } else if (e.key.length === 1 && nameInput.length < 12) {
+            nameInput += e.key;
+        }
     }
 });
-document.addEventListener("keyup", e => (keys[e.code] = false));
+
+document.addEventListener("keyup", e => {
+    if (!nameInputActive) keys[e.code] = false;
+});
 
 // ================= GAME LOOP =================
 function update() {
@@ -131,12 +155,14 @@ function update() {
                 player.y < h.y + h.h
             ) {
                 gameState = "failed";
+                finishTime = Math.floor((Date.now() - startTime) / 1000);
             }
         });
 
         // Top / bottom death
         if (player.y < 0 || player.y + player.h > canvas.height) {
             gameState = "failed";
+            finishTime = Math.floor((Date.now() - startTime) / 1000);
         }
 
         // Goal
@@ -147,11 +173,11 @@ function update() {
             player.y < goal.y + goal.h
         ) {
             gameState = "won";
+            finishTime = Math.floor((Date.now() - startTime) / 1000);
 
             if (!streakUpdatedThisRun) {
                 const today = getESTDateString();
 
-                // Update streak
                 if (streakData.lastWinDate === getYesterdayEST(today)) {
                     streakData.streak += 1;
                 } else {
@@ -160,19 +186,16 @@ function update() {
 
                 streakData.lastWinDate = today;
 
-                // Prompt for name once
+                // Activate name input if not set
                 if (!streakData.playerName) {
-                    let name = prompt(
-                        "Congrats! Enter your name for the leaderboard:"
+                    nameInputActive = true;
+                    nameInput = "";
+                } else {
+                    localStorage.setItem(
+                        "flipventure_streak",
+                        JSON.stringify(streakData)
                     );
-                    if (!name) name = "Guest";
-                    streakData.playerName = name.substring(0, 12);
                 }
-
-                localStorage.setItem(
-                    "flipventure_streak",
-                    JSON.stringify(streakData)
-                );
 
                 streakUpdatedThisRun = true;
             }
@@ -191,7 +214,7 @@ function update() {
 // ================= DRAW =================
 function draw() {
     // Canvas background
-    ctx.fillStyle = "#dbe9f4"; // light blue, can change
+    ctx.fillStyle = "#dbe9f4";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Platforms
@@ -222,10 +245,11 @@ function draw() {
         ctx.fillText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
         ctx.font = "22px Arial";
         ctx.fillText(
-            "Refresh to try again",
+            `Time: ${finishTime}s`,
             canvas.width / 2,
             canvas.height / 2 + 50
         );
+        ctx.fillText("Refresh to try again", canvas.width / 2, canvas.height / 2 + 80);
     }
 
     // Win screen
@@ -248,21 +272,32 @@ function draw() {
             canvas.height / 2 + 60
         );
 
-        // Player Name
+        // Time
         ctx.font = "22px Arial";
         ctx.fillText(
-            `Player: ${streakData.playerName || "Guest"}`,
+            `Time: ${finishTime}s`,
             canvas.width / 2,
             canvas.height / 2 + 90
         );
 
-        // Reminder
-        ctx.font = "18px Arial";
-        ctx.fillText(
-            "Come back tomorrow",
-            canvas.width / 2,
-            canvas.height / 2 + 120
-        );
+        // Name input (if active)
+        if (nameInputActive) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 + 120, 200, 35);
+            ctx.fillStyle = "#000000";
+            ctx.font = "20px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText(nameInput, canvas.width / 2 - 95, canvas.height / 2 + 147);
+            ctx.textAlign = "center";
+        } else {
+            ctx.font = "18px Arial";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(
+                "Come back tomorrow",
+                canvas.width / 2,
+                canvas.height / 2 + 120
+            );
+        }
     }
 }
 
