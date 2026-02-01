@@ -32,14 +32,7 @@ if (!leaderboard[today]) leaderboard[today] = [];
 let streakUpdatedThisRun = false;
 
 // ================= PLAYER =================
-let player = {
-    x: 0,
-    y: 0,
-    w: 35,
-    h: 35,
-    vy: 0,
-    color: "#7ec8e3"
-};
+let player = { x: 0, y: 0, w: 35, h: 35, vy: 0, color: "#7ec8e3" };
 
 // ================= PLATFORMS =================
 let platforms = [
@@ -63,13 +56,7 @@ let hazards = platforms.slice(1, 6).map(p => ({
 
 // ================= GOAL =================
 let highestPlatform = platforms.reduce((a, b) => (b.y < a.y ? b : a));
-let goal = {
-    w: 30,
-    h: 30,
-    x: highestPlatform.x + highestPlatform.w / 2 - 15,
-    y: highestPlatform.y + highestPlatform.h,
-    color: "#3cb371"
-};
+let goal = { w: 30, h: 30, x: highestPlatform.x + highestPlatform.w/2 - 15, y: highestPlatform.y + highestPlatform.h, color: "#3cb371" };
 
 // ================= GAME STATE =================
 let keys = {};
@@ -89,118 +76,91 @@ player.y = platforms[0].y - player.h;
 
 // ================= CONTROLS =================
 document.addEventListener("keydown", e => {
-    // Game controls
     if (gameState === "playing" && !nameInputActive) {
         keys[e.code] = true;
         if (e.code === "Space") gravityDir *= -1;
     }
 
-    // Name input controls
     if (nameInputActive) {
-        if (e.key === "Backspace") {
-            nameInput = nameInput.slice(0, -1);
-        } else if (e.key === "Enter") {
-            if (nameInput.trim() === "") nameInput = "Guest";
-            streakData.playerName = nameInput.substring(0, 12);
-            streakData.lastTimeMs = finishTimeMs;
-
-            // SAVE STREAK
-            localStorage.setItem("flipventure_streak", JSON.stringify(streakData));
-
-            // SAVE LEADERBOARD
-            let todayLB = leaderboard[today];
-            todayLB.push({ name: streakData.playerName, time: finishTimeMs });
-            // Sort by fastest
-            todayLB.sort((a, b) => a.time - b.time);
-            // Keep top 5
-            leaderboard[today] = todayLB.slice(0, 5);
-            localStorage.setItem("flipventure_leaderboard", JSON.stringify(leaderboard));
-
-            nameInputActive = false;
-        } else if (e.key.length === 1 && nameInput.length < 12) {
-            nameInput += e.key;
-        }
+        if (e.key === "Backspace") nameInput = nameInput.slice(0, -1);
+        else if (e.key === "Enter") submitName();
+        else if (e.key.length === 1 && nameInput.length < 12) nameInput += e.key;
     }
 });
 
-document.addEventListener("keyup", e => {
-    if (!nameInputActive) keys[e.code] = false;
-});
+document.addEventListener("keyup", e => { if (!nameInputActive) keys[e.code] = false; });
+
+// ================= SUBMIT NAME & UPDATE LEADERBOARD =================
+function submitName() {
+    if (nameInput.trim() === "") nameInput = "Guest";
+    streakData.playerName = nameInput.substring(0, 12);
+    streakData.lastTimeMs = finishTimeMs;
+
+    localStorage.setItem("flipventure_streak", JSON.stringify(streakData));
+
+    let todayLB = leaderboard[today];
+    todayLB.push({ name: streakData.playerName, time: finishTimeMs });
+    todayLB.sort((a, b) => a.time - b.time);
+    leaderboard[today] = todayLB.slice(0, 5);
+    localStorage.setItem("flipventure_leaderboard", JSON.stringify(leaderboard));
+
+    nameInputActive = false;
+    updateLeaderboardHTML();
+}
+
+// ================= UPDATE LEADERBOARD HTML =================
+function updateLeaderboardHTML() {
+    const todayLB = leaderboard[today] || [];
+    const lbList = document.getElementById("leaderboardList");
+    lbList.innerHTML = "";
+
+    todayLB.forEach(entry => {
+        const totalSeconds = Math.floor(entry.time / 1000);
+        const ms = entry.time % 1000;
+        const displayTime = `${totalSeconds}:${ms.toString().padStart(3,"0")}`;
+
+        const li = document.createElement("li");
+        li.textContent = `${entry.name} - ${displayTime}s`;
+        lbList.appendChild(li);
+    });
+}
 
 // ================= GAME LOOP =================
 function update() {
     if (gameState === "playing") {
-        // Horizontal movement
         if (keys["ArrowLeft"]) player.x -= speedX;
         if (keys["ArrowRight"]) player.x += speedX;
 
-        // Gravity
         player.vy += gravity * gravityDir;
         player.y += player.vy;
 
         // Platform collisions
         platforms.forEach(p => {
             if (player.x + player.w > p.x && player.x < p.x + p.w) {
-                if (
-                    gravityDir === 1 &&
-                    player.y + player.h > p.y &&
-                    player.y + player.h < p.y + p.h + Math.abs(player.vy)
-                ) {
-                    player.y = p.y - player.h;
-                    player.vy = 0;
+                if (gravityDir === 1 && player.y + player.h > p.y && player.y + player.h < p.y + p.h + Math.abs(player.vy)) {
+                    player.y = p.y - player.h; player.vy = 0;
                 }
-
-                if (
-                    gravityDir === -1 &&
-                    player.y < p.y + p.h &&
-                    player.y > p.y - player.h - Math.abs(player.vy)
-                ) {
-                    player.y = p.y + p.h;
-                    player.vy = 0;
+                if (gravityDir === -1 && player.y < p.y + p.h && player.y > p.y - player.h - Math.abs(player.vy)) {
+                    player.y = p.y + p.h; player.vy = 0;
                 }
             }
         });
 
-        // Hazards
         hazards.forEach(h => {
-            if (
-                player.x + player.w > h.x &&
-                player.x < h.x + h.w &&
-                player.y + player.h > h.y &&
-                player.y < h.y + h.h
-            ) {
-                gameState = "failed";
-                finishTimeMs = Date.now() - startTime;
+            if (player.x + player.w > h.x && player.x < h.x + h.w && player.y + player.h > h.y && player.y < h.y + h.h) {
+                gameState = "failed"; finishTimeMs = Date.now() - startTime;
             }
         });
 
-        // Top / bottom death
-        if (player.y < 0 || player.y + player.h > canvas.height) {
-            gameState = "failed";
-            finishTimeMs = Date.now() - startTime;
+        if (player.y < 0 || player.y + player.h > canvas.height) { gameState = "failed"; finishTimeMs = Date.now() - startTime; }
+
+        if (player.x + player.w > goal.x && player.x < goal.x + goal.w && player.y + player.h > goal.y && player.y < goal.y + goal.h) {
+            gameState = "won"; finishTimeMs = Date.now() - startTime;
+            if (!nameInputActive) { nameInputActive = true; nameInput = streakData.playerName || ""; }
         }
 
-        // Goal
-        if (
-            player.x + player.w > goal.x &&
-            player.x < goal.x + goal.w &&
-            player.y + player.h > goal.y &&
-            player.y < goal.y + goal.h
-        ) {
-            gameState = "won";
-            finishTimeMs = Date.now() - startTime;
-
-            // Activate name input on win
-            if (!nameInputActive) {
-                nameInputActive = true;
-                nameInput = streakData.playerName || "";
-            }
-        }
-
-        // Bounds
         if (player.x < 0) player.x = 0;
-        if (player.x + player.w > canvas.width)
-            player.x = canvas.width - player.w;
+        if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
     }
 
     draw();
@@ -209,81 +169,37 @@ function update() {
 
 // ================= DRAW =================
 function draw() {
-    ctx.fillStyle = "#dbe9f4";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#dbe9f4"; ctx.fillRect(0,0,canvas.width,canvas.height);
 
     // Platforms
-    ctx.fillStyle = "#2c3e50";
-    platforms.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+    ctx.fillStyle = "#2c3e50"; platforms.forEach(p=>ctx.fillRect(p.x,p.y,p.w,p.h));
 
     // Hazards
-    hazards.forEach(h => {
-        ctx.fillStyle = h.color;
-        ctx.fillRect(h.x, h.y, h.w, h.h);
-    });
+    hazards.forEach(h=>{ ctx.fillStyle=h.color; ctx.fillRect(h.x,h.y,h.w,h.h); });
 
     // Goal
-    ctx.fillStyle = goal.color;
-    ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+    ctx.fillStyle = goal.color; ctx.fillRect(goal.x,goal.y,goal.w,goal.h);
 
     // Player
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.fillStyle = player.color; ctx.fillRect(player.x,player.y,player.w,player.h);
 
     // Failed screen
     if (gameState === "failed") {
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#e74c3c";
-        ctx.font = "50px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
-        ctx.font = "22px Arial";
-        ctx.fillText("Refresh to try again", canvas.width / 2, canvas.height / 2 + 50);
+        ctx.fillStyle="rgba(0,0,0,0.7)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle="#e74c3c"; ctx.font="50px Arial"; ctx.textAlign="center";
+        ctx.fillText("LEVEL FAILED", canvas.width/2, canvas.height/2);
+        ctx.font="22px Arial"; ctx.fillText("Refresh to try again", canvas.width/2, canvas.height/2+50);
     }
 
-    // Win screen
-    if (gameState === "won") {
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#3cb371";
-        ctx.font = "50px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("LEVEL COMPLETE!", canvas.width / 2, canvas.height / 2);
-
-        // Streak
-        ctx.font = "24px Arial";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(
-            `🔥 Streak: ${streakData.streak} day${streakData.streak === 1 ? "" : "s"}`,
-            canvas.width / 2,
-            canvas.height / 2 + 60
-        );
-
-        // Name input
-        if (nameInputActive) {
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 + 120, 200, 35);
-            ctx.fillStyle = "#000000";
-            ctx.font = "20px Arial";
-            ctx.textAlign = "left";
-            ctx.fillText(nameInput, canvas.width / 2 - 95, canvas.height / 2 + 147);
-            ctx.textAlign = "center";
-        }
-
-        // Leaderboard
-        const todayLB = leaderboard[today] || [];
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "left";
-        ctx.fillText("🏆 Top 5 Times Today:", 50, canvas.height / 2 + 180);
-
-        todayLB.forEach((entry, index) => {
-            let seconds = (entry.time / 1000).toFixed(2);
-            ctx.fillText(`${index + 1}. ${entry.name} - ${seconds}s`, 50, canvas.height / 2 + 210 + index * 30);
-        });
+    // Name input inside canvas
+    if (gameState==="won" && nameInputActive) {
+        ctx.fillStyle="#ffffff"; ctx.fillRect(canvas.width/2-100,canvas.height/2+120,200,35);
+        ctx.fillStyle="#000000"; ctx.font="20px Arial"; ctx.textAlign="left";
+        ctx.fillText(nameInput, canvas.width/2-95, canvas.height/2+147);
+        ctx.textAlign="center";
     }
 }
 
 // ================= START =================
 update();
+updateLeaderboardHTML();
