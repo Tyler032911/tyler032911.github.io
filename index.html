@@ -1,34 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FlipVenture</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <!-- Game Title -->
-    <h1>
-        <span class="flip">Flip</span><span class="venture">Venture</span>
+<div id="container">
+  <div id="gameColumn">
+    <h1 id="gameTitle">
+      <span class="flip">Flip</span><span class="venture">Venture</span>
     </h1>
+    <canvas id="gameCanvas"></canvas>
+  </div>
 
-    <div class="game-container">
-        <!-- Game Canvas -->
-        <canvas id="gameCanvas"></canvas>
-
-        <!-- Leaderboard Box -->
-        <div id="leaderboardBox">
-            <h3>🏆 Leaderboard</h3>
-            <ol id="leaderboardList">
-                <li>—:—:—</li>
-                <li>—:—:—</li>
-                <li>—:—:—</li>
-                <li>—:—:—</li>
-                <li>—:—:—</li>
-            </ol>
-        </div>
-    </div>
-
-    <script src="game.js"></script>
-</body>
-</html>
+  <div id="leaderboard">
+    <h3>Leaderboard</h3>
+    <ul id="leaderboardList"></ul>
+  </div>
+</div>
