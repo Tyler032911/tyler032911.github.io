@@ -26,7 +26,8 @@ function getYesterdayEST(dateStr) {
 let streakData = JSON.parse(localStorage.getItem("flipventure_streak")) || {
     lastWinDate: null,
     streak: 0,
-    playerName: null
+    playerName: null,
+    lastTimeMs: null
 };
 
 let streakUpdatedThisRun = false;
@@ -61,7 +62,7 @@ let hazards = platforms.slice(1, 6).map(p => ({
     color: "#e74c3c"
 }));
 
-// ================= GOAL (bottom of highest platform) =================
+// ================= GOAL =================
 let highestPlatform = platforms.reduce((a, b) => (b.y < a.y ? b : a));
 let goal = {
     w: 30,
@@ -77,7 +78,7 @@ let gameState = "playing";
 
 // ================= TIMER =================
 let startTime = Date.now();
-let finishTime = 0;
+let finishTimeMs = 0;
 
 // ================= NAME INPUT =================
 let nameInputActive = false;
@@ -89,17 +90,20 @@ player.y = platforms[0].y - player.h;
 
 // ================= CONTROLS =================
 document.addEventListener("keydown", e => {
-    if (gameState === "playing") {
+    // Game controls
+    if (gameState === "playing" && !nameInputActive) {
         keys[e.code] = true;
         if (e.code === "Space") gravityDir *= -1;
     }
-    // Handle name input
+
+    // Name input controls
     if (nameInputActive) {
         if (e.key === "Backspace") {
             nameInput = nameInput.slice(0, -1);
         } else if (e.key === "Enter") {
             if (nameInput.trim() === "") nameInput = "Guest";
             streakData.playerName = nameInput.substring(0, 12);
+            streakData.lastTimeMs = finishTimeMs; // save precise time for leaderboard
             localStorage.setItem("flipventure_streak", JSON.stringify(streakData));
             nameInputActive = false;
         } else if (e.key.length === 1 && nameInput.length < 12) {
@@ -155,14 +159,14 @@ function update() {
                 player.y < h.y + h.h
             ) {
                 gameState = "failed";
-                finishTime = Math.floor((Date.now() - startTime) / 1000);
+                finishTimeMs = Date.now() - startTime;
             }
         });
 
         // Top / bottom death
         if (player.y < 0 || player.y + player.h > canvas.height) {
             gameState = "failed";
-            finishTime = Math.floor((Date.now() - startTime) / 1000);
+            finishTimeMs = Date.now() - startTime;
         }
 
         // Goal
@@ -173,7 +177,7 @@ function update() {
             player.y < goal.y + goal.h
         ) {
             gameState = "won";
-            finishTime = Math.floor((Date.now() - startTime) / 1000);
+            finishTimeMs = Date.now() - startTime;
 
             if (!streakUpdatedThisRun) {
                 const today = getESTDateString();
@@ -191,6 +195,7 @@ function update() {
                     nameInputActive = true;
                     nameInput = "";
                 } else {
+                    streakData.lastTimeMs = finishTimeMs;
                     localStorage.setItem(
                         "flipventure_streak",
                         JSON.stringify(streakData)
@@ -213,7 +218,6 @@ function update() {
 
 // ================= DRAW =================
 function draw() {
-    // Canvas background
     ctx.fillStyle = "#dbe9f4";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -244,12 +248,7 @@ function draw() {
         ctx.textAlign = "center";
         ctx.fillText("LEVEL FAILED", canvas.width / 2, canvas.height / 2);
         ctx.font = "22px Arial";
-        ctx.fillText(
-            `Time: ${finishTime}s`,
-            canvas.width / 2,
-            canvas.height / 2 + 50
-        );
-        ctx.fillText("Refresh to try again", canvas.width / 2, canvas.height / 2 + 80);
+        ctx.fillText("Refresh to try again", canvas.width / 2, canvas.height / 2 + 50);
     }
 
     // Win screen
@@ -265,22 +264,12 @@ function draw() {
         ctx.font = "24px Arial";
         ctx.fillStyle = "#ffffff";
         ctx.fillText(
-            `🔥 Streak: ${streakData.streak} day${
-                streakData.streak === 1 ? "" : "s"
-            }`,
+            `🔥 Streak: ${streakData.streak} day${streakData.streak === 1 ? "" : "s"}`,
             canvas.width / 2,
             canvas.height / 2 + 60
         );
 
-        // Time
-        ctx.font = "22px Arial";
-        ctx.fillText(
-            `Time: ${finishTime}s`,
-            canvas.width / 2,
-            canvas.height / 2 + 90
-        );
-
-        // Name input (if active)
+        // Name input inside canvas
         if (nameInputActive) {
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 + 120, 200, 35);
