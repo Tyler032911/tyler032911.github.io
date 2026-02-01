@@ -178,7 +178,7 @@ function update() {
 
 // ================= DRAW =================
 function draw() {
-    ctx.fillStyle = "#888";
+    ctx.fillStyle = "#eee";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Platforms
@@ -245,3 +245,4 @@ function draw() {
 
 // ================= START =================
 update();
+
