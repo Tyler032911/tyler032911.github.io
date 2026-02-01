@@ -17,11 +17,7 @@ function getESTDateString() {
     return est.toISOString().split("T")[0];
 }
 
-function getYesterdayEST(dateStr) {
-    const d = new Date(dateStr);
-    d.setDate(d.getDate() - 1);
-    return d.toISOString().split("T")[0];
-}
+let today = getESTDateString();
 
 let streakData = JSON.parse(localStorage.getItem("flipventure_streak")) || {
     lastWinDate: null,
@@ -29,6 +25,9 @@ let streakData = JSON.parse(localStorage.getItem("flipventure_streak")) || {
     playerName: null,
     lastTimeMs: null
 };
+
+let leaderboard = JSON.parse(localStorage.getItem("flipventure_leaderboard")) || {};
+if (!leaderboard[today]) leaderboard[today] = [];
 
 let streakUpdatedThisRun = false;
 
@@ -103,8 +102,20 @@ document.addEventListener("keydown", e => {
         } else if (e.key === "Enter") {
             if (nameInput.trim() === "") nameInput = "Guest";
             streakData.playerName = nameInput.substring(0, 12);
-            streakData.lastTimeMs = finishTimeMs; // save precise time for leaderboard
+            streakData.lastTimeMs = finishTimeMs;
+
+            // SAVE STREAK
             localStorage.setItem("flipventure_streak", JSON.stringify(streakData));
+
+            // SAVE LEADERBOARD
+            let todayLB = leaderboard[today];
+            todayLB.push({ name: streakData.playerName, time: finishTimeMs });
+            // Sort by fastest
+            todayLB.sort((a, b) => a.time - b.time);
+            // Keep top 5
+            leaderboard[today] = todayLB.slice(0, 5);
+            localStorage.setItem("flipventure_leaderboard", JSON.stringify(leaderboard));
+
             nameInputActive = false;
         } else if (e.key.length === 1 && nameInput.length < 12) {
             nameInput += e.key;
@@ -179,30 +190,10 @@ function update() {
             gameState = "won";
             finishTimeMs = Date.now() - startTime;
 
-            if (!streakUpdatedThisRun) {
-                const today = getESTDateString();
-
-                if (streakData.lastWinDate === getYesterdayEST(today)) {
-                    streakData.streak += 1;
-                } else {
-                    streakData.streak = 1;
-                }
-
-                streakData.lastWinDate = today;
-
-                // Activate name input if not set
-                if (!streakData.playerName) {
-                    nameInputActive = true;
-                    nameInput = "";
-                } else {
-                    streakData.lastTimeMs = finishTimeMs;
-                    localStorage.setItem(
-                        "flipventure_streak",
-                        JSON.stringify(streakData)
-                    );
-                }
-
-                streakUpdatedThisRun = true;
+            // Activate name input on win
+            if (!nameInputActive) {
+                nameInputActive = true;
+                nameInput = streakData.playerName || "";
             }
         }
 
@@ -269,7 +260,7 @@ function draw() {
             canvas.height / 2 + 60
         );
 
-        // Name input inside canvas
+        // Name input
         if (nameInputActive) {
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 + 120, 200, 35);
@@ -278,15 +269,19 @@ function draw() {
             ctx.textAlign = "left";
             ctx.fillText(nameInput, canvas.width / 2 - 95, canvas.height / 2 + 147);
             ctx.textAlign = "center";
-        } else {
-            ctx.font = "18px Arial";
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText(
-                "Come back tomorrow",
-                canvas.width / 2,
-                canvas.height / 2 + 120
-            );
         }
+
+        // Leaderboard
+        const todayLB = leaderboard[today] || [];
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "left";
+        ctx.fillText("🏆 Top 5 Times Today:", 50, canvas.height / 2 + 180);
+
+        todayLB.forEach((entry, index) => {
+            let seconds = (entry.time / 1000).toFixed(2);
+            ctx.fillText(`${index + 1}. ${entry.name} - ${seconds}s`, 50, canvas.height / 2 + 210 + index * 30);
+        });
     }
 }
 
