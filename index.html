@@ -1,45 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<style>
-body {
-    margin: 0;
-    background: #222; /* page background */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    color: #fff;
-}
+    <meta charset="UTF-8">
+    <title>FlipVenture</title>
 
-#titleBar {
-    width: 100%;
-    text-align: center;
-    padding: 20px 0;
-    font-size: 50px;
-    background: transparent; /* no black bar */
-}
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3730378096177106"
+     crossorigin="anonymous"></script>
 
-#titleBar .flip {
-    color: #7ec8e3; /* light blue */
-}
 
-#titleBar .venture {
-    color: #f7b26a; /* light orange */
-}
-
-canvas {
-    background: #eee;
-    border: 2px solid #000;
-    margin-top: 20px; /* buffer between title and game */
-}
-</style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="titleBar">
-    <span class="flip">FLIP</span><span class="venture">VENTURE</span>
-</div>
-<canvas id="gameCanvas"></canvas>
-<script src="game.js"></script>
+
+    <h1>
+        <span class="flip">Flip</span><span class="venture">Venture</span>
+    </h1>
+
+    <div class="ad-container">
+
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="game.js"></script>
 </body>
 </html>
