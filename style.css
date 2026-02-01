@@ -2,22 +2,51 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
     background: #222;
     font-family: Arial, sans-serif;
+    color: #fff;
+    min-height: 100vh;
 }
 
 h1 {
-    margin: 10px 0;
     font-size: 48px;
+    margin: 20px 0;
+    text-align: center;
 }
 
 h1 .flip { color: #7ec8e3; }
 h1 .venture { color: #f6b26b; }
 
+.game-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
 canvas {
     background: #eee;
     border: 2px solid #000;
+}
+
+#leaderboardBox {
+    width: 220px;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    color: #333;
+}
+
+#leaderboardBox h3 {
+    text-align: center;
+    margin-top: 0;
+}
+
+#leaderboardList {
+    padding-left: 20px;
+}
+#leaderboardList li {
+    margin-bottom: 5px;
+    font-family: monospace;
 }
