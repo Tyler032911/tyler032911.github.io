@@ -67,3 +67,8 @@ body {
     font-size: 16px;
     margin: 6px 0;
 }
+
+/* Top 3 colors */
+#leaderboardList li:nth-child(1) { color: gold; font-weight: bold; }
+#leaderboardList li:nth-child(2) { color: silver; font-weight: bold; }
+#leaderboardList li:nth-child(3) { color: #cd7f32; font-weight: bold; } /* bronze */
