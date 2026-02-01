@@ -5,11 +5,10 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* Layout */
 #container {
     display: flex;
     justify-content: center;
-    gap: 40px;          /* Leaderboard moved farther right */
+    gap: 40px;
     margin-top: 20px;
 }
 
@@ -23,9 +22,20 @@ body {
     margin: 10px 0;
     font-size: 48px;
 }
-
 .flip { color: #7ec8e3; }
 .venture { color: #f6b26b; }
+
+/* Controls */
+#controls {
+    text-align: center;
+    color: #7ec8e3;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+#controls p {
+    margin: 2px 0;
+}
 
 /* Canvas */
 #gameCanvas {
@@ -40,7 +50,7 @@ body {
     color: #000;
     border-radius: 10px;
     padding: 12px;
-    align-self: flex-start;   /* Stops vertical stretching */
+    align-self: flex-start;
 }
 
 #leaderboard h3 {
@@ -56,25 +66,4 @@ body {
 #leaderboardList li {
     font-size: 16px;
     margin: 6px 0;
-}
-
-/* Controls box */
-#controls {
-    width: 220px;
-    background: #fff;
-    color: #000;
-    border-radius: 10px;
-    padding: 12px;
-    margin-top: 12px;
-    font-size: 14px;
-}
-
-#controls h3 {
-    margin: 0 0 8px 0;
-    text-align: center;
-}
-
-#controls p {
-    margin: 4px 0;
-    text-align: center;
 }
