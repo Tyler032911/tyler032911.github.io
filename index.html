@@ -3,11 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>FlipVenture</title>
-
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3730378096177106"
-     crossorigin="anonymous"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,22 +12,20 @@
         <span class="flip">Flip</span><span class="venture">Venture</span>
     </h1>
 
-    <div style="display: flex; gap: 20px; align-items: flex-start;">
-        <!-- Canvas for the game -->
+    <div class="game-container">
+        <!-- Game Canvas -->
         <canvas id="gameCanvas"></canvas>
 
-        <!-- Leaderboard box -->
-        <div id="leaderboardBox" style="
-            width: 220px;
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            font-family: Arial, sans-serif;
-            color: #333;
-        ">
-            <h3 style="margin-top: 0; text-align: center;">🏆 Leaderboard</h3>
-            <ol id="leaderboardList" style="padding-left: 20px;"></ol>
+        <!-- Leaderboard Box -->
+        <div id="leaderboardBox">
+            <h3>🏆 Leaderboard</h3>
+            <ol id="leaderboardList">
+                <li>—:—:—</li>
+                <li>—:—:—</li>
+                <li>—:—:—</li>
+                <li>—:—:—</li>
+                <li>—:—:—</li>
+            </ol>
         </div>
     </div>
 
