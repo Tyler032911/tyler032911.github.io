@@ -1,71 +1,42 @@
-body {
-    margin: 0;
-    background: #222;
-    color: #fff;
-    font-family: Arial, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FlipVenture</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-/* Layout */
-#container {
-    display: flex;
-    justify-content: center;
-    gap: 40px;          /* leaderboard farther right */
-    margin-top: 20px;
-}
+<div id="container">
 
-/* Game column */
-#gameColumn {
-    width: 600px;
-    text-align: center;
-}
+    <div id="gameColumn">
+        <h1 id="gameTitle">
+            <span class="flip">Flip</span><span class="venture">Venture</span>
+        </h1>
 
-#gameTitle {
-    margin: 10px 0;
-    font-size: 48px;
-}
+        <!-- Controls -->
+        <div id="controls">
+            <p>← → : Move</p>
+            <p>Space : Swap Gravity</p>
+        </div>
 
-.flip { color: #7ec8e3; }
-.venture { color: #f6b26b; }
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+    </div>
 
-/* Controls above canvas */
-#controls {
-    text-align: center;
-    color: #7ec8e3; /* light blue */
-    font-size: 16px;
-    margin-bottom: 8px;
-}
+    <div id="leaderboard">
+        <h3>Leaderboard</h3>
+        <ul id="leaderboardList">
+            <li>1:</li>
+            <li>2:</li>
+            <li>3:</li>
+            <li>4:</li>
+            <li>5:</li>
+        </ul>
+    </div>
 
-#controls p {
-    margin: 2px 0;
-}
+</div>
 
-/* Canvas */
-#gameCanvas {
-    background: #dbe9f4;
-    border: 2px solid #000;
-}
-
-/* Leaderboard */
-#leaderboard {
-    width: 220px;
-    background: #fff;
-    color: #000;
-    border-radius: 10px;
-    padding: 12px;
-    align-self: flex-start;   /* Stops vertical stretching */
-}
-
-#leaderboard h3 {
-    margin: 0 0 10px 0;
-    text-align: center;
-}
-
-#leaderboardList {
-    padding-left: 20px;
-    margin: 0;
-}
-
-#leaderboardList li {
-    font-size: 16px;
-    margin: 6px 0;
-}
+<script src="game.js"></script>
+</body>
+</html>
