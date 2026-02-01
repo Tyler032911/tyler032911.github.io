@@ -1,35 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FlipVenture</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+body {
+    margin: 0;
+    background: #222;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
 
-<div id="container">
+/* Layout */
+#container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;          /* leaderboard farther right */
+    margin-top: 20px;
+}
 
-    <div id="gameColumn">
-        <h1 id="gameTitle">
-            <span class="flip">Flip</span><span class="venture">Venture</span>
-        </h1>
+/* Game column */
+#gameColumn {
+    width: 600px;
+    text-align: center;
+}
 
-        <!-- Controls text above canvas -->
-        <div id="controls">
-            <p>← → : Move</p>
-            <p>Space : Swap Gravity</p>
-        </div>
+#gameTitle {
+    margin: 10px 0;
+    font-size: 48px;
+}
 
-        <canvas id="gameCanvas"></canvas>
-    </div>
+.flip { color: #7ec8e3; }
+.venture { color: #f6b26b; }
 
-    <div id="leaderboard">
-        <h3>Leaderboard</h3>
-        <ul id="leaderboardList"></ul>
-    </div>
+/* Controls above canvas */
+#controls {
+    text-align: center;
+    color: #7ec8e3; /* light blue */
+    font-size: 16px;
+    margin-bottom: 8px;
+}
 
-</div>
+#controls p {
+    margin: 2px 0;
+}
 
-<script src="game.js"></script>
-</body>
-</html>
+/* Canvas */
+#gameCanvas {
+    background: #dbe9f4;
+    border: 2px solid #000;
+}
+
+/* Leaderboard */
+#leaderboard {
+    width: 220px;
+    background: #fff;
+    color: #000;
+    border-radius: 10px;
+    padding: 12px;
+    align-self: flex-start;   /* Stops vertical stretching */
+}
+
+#leaderboard h3 {
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+#leaderboardList {
+    padding-left: 20px;
+    margin: 0;
+}
+
+#leaderboardList li {
+    font-size: 16px;
+    margin: 6px 0;
+}
